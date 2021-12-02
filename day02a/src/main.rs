@@ -2,14 +2,11 @@ fn get_product_of_headings(headings: Vec<(&str, i32)>) -> i32 {
     let mut depth = 0;
     let mut distance = 0;
     for (direction, value) in headings {
-        if direction == "forward" {
-            distance += value;
-        }
-        if direction == "down" {
-            depth += value
-        }
-        if direction == "up" {
-            depth -= value
+        match direction {
+            "forward" => distance += value,
+            "down" => depth += value,
+            "up" => depth -= value,
+            _ => panic!("Ya done messed up"),
         }
     }
     depth * distance

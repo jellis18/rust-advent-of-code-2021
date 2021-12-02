@@ -3,15 +3,14 @@ fn get_product_of_headings(headings: Vec<(&str, i32)>) -> i32 {
     let mut distance = 0;
     let mut aim = 0;
     for (direction, value) in headings {
-        if direction == "forward" {
-            distance += value;
-            depth += aim * value;
-        }
-        if direction == "down" {
-            aim += value
-        }
-        if direction == "up" {
-            aim -= value
+        match direction {
+            "forward" => {
+                distance += value;
+                depth += aim * value;
+            }
+            "down" => aim += value,
+            "up" => aim -= value,
+            _ => panic!("Ya done messed up"),
         }
     }
     depth * distance
