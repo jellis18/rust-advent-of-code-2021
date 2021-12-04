@@ -94,71 +94,23 @@ fn main() {
         .collect();
 
     // play the game and find score of winning board
-    'outer: for v in draws {
+    let mut winner_scores = Vec::new();
+    let mut winners = Vec::new();
+    for v in draws {
+        let mut board_count = 0;
         for board in &mut boards {
-            board.update(v);
-            if board.is_winner() == true {
-                println!("We have a winner with score {}", board.score());
-                break 'outer;
+            if !winners.contains(&board_count) {
+                board.update(v);
+                if board.is_winner() == true {
+                    winner_scores.push(board.score());
+                    winners.push(board_count)
+                }
             }
+            board_count += 1;
         }
     }
-}
-
-#[test]
-fn test_board_map_is_updated_correctly_with_value_on_board() {
-    let board_str = "
-22 13 17 11  0
- 8  2 23  4  3
-21  9 14 16  7
- 6 10  3 18  5
- 1 12 20 15 19
- ";
-    let mut board = BingoBoard::from_string(board_str);
-    board.update(3);
-    assert_eq!(board.marked_values, vec![3])
-}
-
-#[test]
-fn test_board_map_is_updated_correctly_with_value_not_on_board() {
-    let board_str = "
-22 13 17 11  0
- 8  2 23  4  3
-21  9 14 16  7
- 6 10  3 18  5
- 1 12 20 15 19
- ";
-    let mut board = BingoBoard::from_string(board_str);
-    board.update(100);
-    assert_eq!(board.marked_values, vec![])
-}
-
-#[test]
-fn test_winning_board() {
-    let board_str = "
-22 13 17 11  0
- 8  2 23  4  3
-21  9 14 16  7
- 6 10  3 18  5
- 1 2 2 1 1
- ";
-    let mut board = BingoBoard::from_string(board_str);
-    board.update(1);
-    board.update(2);
-    assert_eq!(true, board.is_winner());
-}
-
-#[test]
-fn test_not_winning_board() {
-    let board_str = "
-22 13 17 11  0
- 8  2 23  4  3
-21  9 14 16  7
- 6 10  3 18  5
- 1 2 2 1 1
- ";
-    let mut board = BingoBoard::from_string(board_str);
-    board.update(1);
-    board.update(24);
-    assert_eq!(false, board.is_winner());
+    println!(
+        "The score of the last winner is {}",
+        winner_scores.last().unwrap()
+    );
 }
