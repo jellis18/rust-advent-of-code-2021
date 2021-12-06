@@ -88,8 +88,6 @@ fn main() {
         "Number of points with overlap > 2 for part 2: {:?}",
         vent_map.num_overlap_points(2)
     );
-    let x = 0;
-    println!("{}", x.signum());
 }
 
 #[test]
