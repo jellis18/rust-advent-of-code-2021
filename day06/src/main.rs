@@ -4,8 +4,8 @@ fn simulate(states: &Vec<u32>, days: u32) -> usize {
     let mut population = HashMap::new();
 
     // set initial counts of fish at a given state
-    for state in states {
-        let count = population.entry(*state).or_insert(0);
+    for &state in states {
+        let count = population.entry(state).or_insert(0);
         *count += 1
     }
 
@@ -13,18 +13,18 @@ fn simulate(states: &Vec<u32>, days: u32) -> usize {
         let mut next = HashMap::new();
         for age in (1..=8).rev() {
             // decrement all by 1 but don't handle new fish (i.e. 0)
-            next.insert(age - 1, *population.get(&age).unwrap_or_else(|| &0));
+            next.insert(age - 1, *population.get(&age).unwrap_or(&0));
         }
 
         // all fish at state 0 in the population will spawn new fish with state 8
-        next.insert(8, *population.get(&0).unwrap_or_else(|| &0));
+        next.insert(8, *population.get(&0).unwrap_or(&0));
 
         // and all fish at state 0 will be reset to state 6, so we add that the
         // existing count of 6s
         let count = next.entry(6).or_insert(0);
-        *count += population.get(&0).unwrap_or_else(|| &0);
+        *count += population.get(&0).unwrap_or(&0);
 
-        // replace population with next sate
+        // replace population with next state
         population = next;
     }
     population.values().sum()
