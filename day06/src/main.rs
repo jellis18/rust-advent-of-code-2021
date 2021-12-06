@@ -10,20 +10,22 @@ fn simulate(states: &Vec<u32>, days: u32) -> usize {
     }
 
     for _ in 0..days {
-        let mut next_generation = HashMap::new();
+        let mut next = HashMap::new();
         for age in (1..=8).rev() {
-            // decrement
-            next_generation.insert(age - 1, *population.get(&age).unwrap_or_else(|| &0));
+            // decrement all by 1 but don't handle new fish (i.e. 0)
+            next.insert(age - 1, *population.get(&age).unwrap_or_else(|| &0));
         }
-        // All 0s will add an 8
-        next_generation.insert(8, *population.get(&0).unwrap_or_else(|| &0));
 
-        // and add
-        let count = next_generation.entry(6).or_insert(0);
+        // all fish at state 0 in the population will spawn new fish with state 8
+        next.insert(8, *population.get(&0).unwrap_or_else(|| &0));
+
+        // and all fish at state 0 will be reset to state 6, so we add that the
+        // existing count of 6s
+        let count = next.entry(6).or_insert(0);
         *count += population.get(&0).unwrap_or_else(|| &0);
 
-        // replace population with next generation
-        population = next_generation;
+        // replace population with next sate
+        population = next;
     }
     population.values().sum()
 }
