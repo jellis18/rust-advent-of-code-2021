@@ -16,21 +16,7 @@ impl VentMap {
             let y_range = y2 - y1;
 
             // determine the step size in each direction
-            let x_step = if x_range < 0 {
-                -1
-            } else if x_range == 0 {
-                0
-            } else {
-                1
-            };
-
-            let y_step = if y_range < 0 {
-                -1
-            } else if y_range == 0 {
-                0
-            } else {
-                1
-            };
+            let (x_step, y_step) = (x_range.signum(), y_range.signum());
 
             // starting in starting position, loop, adding the step to each coordinate
             // until we reach the endpoint
@@ -102,6 +88,8 @@ fn main() {
         "Number of points with overlap > 2 for part 2: {:?}",
         vent_map.num_overlap_points(2)
     );
+    let x = 0;
+    println!("{}", x.signum());
 }
 
 #[test]
