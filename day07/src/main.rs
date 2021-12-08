@@ -12,9 +12,20 @@ fn get_minimum_fuel_spent_part2(pos: Vec<i32>) -> i32 {
     // inefficient and dumb but today was a day :(
     let n = pos.len();
     let max = *pos.iter().max().unwrap();
+    let cumsum: Vec<i32> = (0..=max)
+        .scan(0, |acc, x| {
+            *acc = *acc + x;
+            Some(*acc)
+        })
+        .collect();
+
     let mut totals = Vec::new();
     for i in 0..max {
-        totals.push((0..n).map(|j| (0..=(pos[j] - i).abs()).sum::<i32>()).sum());
+        totals.push(
+            (0..n)
+                .map(|j| cumsum[usize::try_from((pos[j] - i).abs()).unwrap()])
+                .sum(),
+        );
     }
     totals.into_iter().min().unwrap()
 }
