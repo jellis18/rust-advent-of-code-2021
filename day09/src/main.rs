@@ -12,34 +12,26 @@ fn parse_input(input: &str) -> Vec<Vec<u32>> {
     x
 }
 
-fn solve_part1(x: Vec<Vec<u32>>) -> u32 {
-    let nrow = x.len();
-    let ncol = x[0].len();
-    let mut risk_level = 0;
-    for i in 0..nrow {
-        for j in 0..ncol {
-            let vertical_points = if i == 0 {
-                x[i][j] < x[i + 1][j]
-            } else if i == (nrow - 1) {
-                x[i][j] < x[i - 1][j]
-            } else {
-                (x[i][j] < x[i + 1][j]) & (x[i][j] < x[i - 1][j])
-            };
-
-            let horizontal_points = if j == 0 {
-                x[i][j] < x[i][j + 1]
-            } else if j == (ncol - 1) {
-                x[i][j] < x[i][j - 1]
-            } else {
-                (x[i][j] < x[i][j + 1]) & (x[i][j] < x[i][j - 1])
-            };
-
-            if (vertical_points == true) & (horizontal_points == true) {
-                risk_level += x[i][j] + 1;
+fn solve_part1(mapping: Vec<Vec<u32>>) -> u32 {
+    let mut height = 0;
+    for i in 0..mapping.len() {
+        for j in 0..mapping[0].len() {
+            let is_low_point = POSITIONS
+                .iter()
+                .map(|(xx, yy)| ((i as isize + xx) as usize, (j as isize + yy) as usize))
+                .all(|(x, y)| {
+                    mapping
+                        .get(x)
+                        .and_then(|v| v.get(y))
+                        .map(|&c| c > mapping[i][j])
+                        .unwrap_or(true)
+                });
+            if is_low_point == true {
+                height += mapping[i][j] + 1;
             }
         }
     }
-    risk_level
+    height
 }
 
 fn solve_part2(mapping: &mut Vec<Vec<u32>>) -> usize {
