@@ -58,14 +58,11 @@ fn solve(
             let insert = rules.get(&(c1, c2)).unwrap();
 
             // update the pair counters
-            let count = next_pair_counter.entry((c1, *insert)).or_insert(0);
-            *count += ct;
+            *next_pair_counter.entry((c1, *insert)).or_insert(0) += ct;
+            *next_pair_counter.entry((*insert, c2)).or_insert(0) += ct;
 
-            let count = next_pair_counter.entry((*insert, c2)).or_insert(0);
-            *count += ct;
-
-            let count = character_counter.entry(*insert).or_insert(0);
-            *count += ct;
+            // update character counter
+            *character_counter.entry(*insert).or_insert(0) += ct;
         }
         pair_counter = next_pair_counter;
     }
