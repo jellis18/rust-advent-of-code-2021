@@ -1,16 +1,13 @@
-use std::{
-    cmp::Ordering,
-    collections::{BinaryHeap, HashMap},
-};
+use std::{cmp::Ordering, collections::BinaryHeap};
 
 const NEIGHBORS: [(isize, isize); 4] = [(0, -1), (0, 1), (-1, 0), (1, 0)];
 
-type Graph = HashMap<(usize, usize), Vec<Edge>>;
+type Graph = Vec<Vec<Edge>>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 struct State {
     cost: usize,
-    position: (usize, usize),
+    position: usize,
 }
 
 impl Ord for State {
@@ -30,42 +27,39 @@ impl PartialOrd for State {
 
 // Dijkstra's shortest path
 // Modified from here: https://doc.rust-lang.org/std/collections/binary_heap/index.html
-fn shortest_path(graph: &Graph, start: (usize, usize), end: (usize, usize)) -> Option<usize> {
-    let mut dist = HashMap::new();
-    for key in graph.keys() {
-        dist.insert(*key, usize::MAX);
-    }
+fn shortest_path(graph: &Graph, start: usize, end: usize) -> Option<usize> {
+    let mut dist: Vec<_> = (0..graph.len()).map(|_| usize::MAX).collect();
 
-    let mut spt = BinaryHeap::new();
+    let mut heap = BinaryHeap::new();
 
     // start at "start" with 0 cost
-    dist.insert(start, 0);
-    spt.push(State {
+    dist[start] = 0;
+    heap.push(State {
         position: start,
         cost: 0,
     });
 
-    while let Some(State { cost, position }) = spt.pop() {
+    while let Some(State { cost, position }) = heap.pop() {
         // stop if we have reached the end
         if position == end {
             return Some(cost);
         }
 
         // if we already found a better way, continue
-        if cost > dist[&position] {
+        if cost > dist[position] {
             continue;
         }
 
         // for each node in the neighborhood, see if we can find a lower cost path
-        for edge in &graph[&position] {
+        for edge in &graph[position] {
             let next = State {
                 cost: cost + edge.cost,
                 position: edge.node,
             };
 
-            if next.cost < dist[&next.position] {
-                spt.push(next);
-                dist.insert(next.position, next.cost);
+            if next.cost < dist[next.position] {
+                heap.push(next);
+                dist[next.position] = next.cost;
             }
         }
     }
@@ -74,7 +68,7 @@ fn shortest_path(graph: &Graph, start: (usize, usize), end: (usize, usize)) -> O
 
 #[derive(Debug)]
 struct Edge {
-    node: (usize, usize),
+    node: usize,
     cost: usize,
 }
 
@@ -120,21 +114,23 @@ fn get_cavern_map_part2(input: &str) -> Vec<Vec<u32>> {
 
 fn build_graph(cavern: Vec<Vec<u32>>) -> Graph {
     // form graph
-    let mut graph = HashMap::new();
+    let mut graph = Vec::new();
+    let nrow = cavern.len();
     for i in 0..cavern.len() {
         for j in 0..cavern[0].len() {
-            let edges = graph.entry((i, j)).or_insert(Vec::new());
+            let mut edges = Vec::new();
             NEIGHBORS
                 .iter()
                 .map(|(xx, yy)| ((i as isize + xx) as usize, (j as isize + yy) as usize))
                 .for_each(|(x, y)| match cavern.get(x).and_then(|v| v.get(y)) {
                     Some(cost) => edges.push(Edge {
-                        node: (x, y),
+                        node: x * nrow + y,
                         cost: *cost as usize,
                     }),
 
                     None => {}
                 });
+            graph.push(edges);
         }
     }
     graph
@@ -144,17 +140,17 @@ fn main() {
     let input = include_str!("../input.txt");
     let cavern = get_cavern_map_part1(input);
     let graph = build_graph(cavern);
-    let start = graph.keys().min().unwrap();
-    let end = graph.keys().max().unwrap();
+    let start = 0 as usize;
+    let end = graph.len() - 1;
     println!("{:?} {:?}", start, end);
-    println!("Part 1: {:?}", shortest_path(&graph, *start, *end));
+    println!("Part 1: {:?}", shortest_path(&graph, start, end));
 
     let cavern = get_cavern_map_part2(input);
     let graph = build_graph(cavern);
-    let start = graph.keys().min().unwrap();
-    let end = graph.keys().max().unwrap();
+    let start = 0 as usize;
+    let end = graph.len() - 1;
     println!("{:?} {:?}", start, end);
-    println!("Part 2: {:?}", shortest_path(&graph, *start, *end));
+    println!("Part 2: {:?}", shortest_path(&graph, start, end));
 }
 
 #[test]
@@ -171,8 +167,8 @@ fn part1() {
 2311944581";
     let cavern = get_cavern_map_part1(input);
     let graph = build_graph(cavern);
-    let start = (0, 0);
-    let end = (9, 9);
+    let start = 0 as usize;
+    let end = graph.len() - 1;
     assert_eq!(Some(40), shortest_path(&graph, start, end));
 }
 
@@ -190,7 +186,7 @@ fn part2() {
 2311944581";
     let cavern = get_cavern_map_part2(input);
     let graph = build_graph(cavern);
-    let start = *graph.keys().min().unwrap();
-    let end = *graph.keys().max().unwrap();
+    let start = 0 as usize;
+    let end = graph.len() - 1;
     assert_eq!(Some(315), shortest_path(&graph, start, end));
 }
